@@ -260,6 +260,8 @@ def main():
 def watch_device(device, pir, fade_in_duration, fade_out_duration, wake_time):
     while True:
         pir.wait_for_motion()
+        print('motion detected')
+
         if device.get_power():
             sleep(0.125)
             continue
@@ -286,6 +288,7 @@ def watch_device(device, pir, fade_in_duration, fade_out_duration, wake_time):
 def watch_group(group, pir, fade_in_duration, fade_out_duration, wake_time):
     while True:
         pir.wait_for_motion()
+        print('motion detected')
 
         device_states = [d.get_power() for d in group.devices]
 
