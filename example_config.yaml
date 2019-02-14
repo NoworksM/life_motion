@@ -1,0 +1,6 @@
+# Example config file with all settings for the project included
+group: Group Name
+fade_in_duration: 2500
+fade_out_duration: 2500
+wake_time: 1000
+pir_sensor_port: 4
