@@ -261,7 +261,7 @@ def watch_device(device, pir, fade_in_duration, fade_out_duration, wake_time):
     while True:
         pir.wait_for_motion()
         if device.get_power():
-            sleep(0.25)
+            sleep(0.125)
             continue
 
         device.set_power(True, fade_in_duration)
@@ -285,29 +285,34 @@ def watch_device(device, pir, fade_in_duration, fade_out_duration, wake_time):
 
 def watch_group(group, pir, fade_in_duration, fade_out_duration, wake_time):
     while True:
-        if check_for_motion():
-            device_states = [d.get_power() for d in group.devices]
+        pir.wait_for_motion()
 
-            for idx, device in enumerate(group.devices):
-                if not device_states[idx]:
-                    device.set_power(True, fade_in_duration)
-            sleep(fade_in_duration / 1000)
+        device_states = [d.get_power() for d in group.devices]
 
-            elapsed_time = 0
+        if all(device_states):
+            sleep(0.125)
+            continue
 
-            while elapsed_time < wake_time:
-                if check_for_motion():
-                    elapsed_time = 0
-                else:
-                    elapsed_time += 250
-                sleep(0.25)
+        for idx, device in enumerate(group.devices):
+            if not device_states[idx]:
+                device.set_power(True, fade_in_duration)
+        sleep(fade_in_duration / 1000)
 
-            for idx, device in enumerate(group.devices):
-                if not device_states[idx]:
-                    device.set_power(False, fade_out_duration)
-            sleep(fade_out_duration / 1000)
-        else:
-            sleep(0.25)
+        start = current_time_millis()
+        now = current_time_millis()
+
+        elapsed = now - start
+
+        while elapsed < wake_time:
+            if pir.motion_detected:
+                start = current_time_millis()
+            now = current_time_millis()
+            elapsed = now - start
+            sleep(0.125)
+        for idx, device in enumerate(group.devices):
+            if not device_states[idx]:
+                device.set_power(False, fade_out_duration)
+        sleep(fade_out_duration / 1000)
 
 
 if __name__ == '__main__':
